@@ -10,5 +10,6 @@ Written in [gpui](https://gpui.rs) and [gpui-component](https://longbridge.githu
 
 Apache-2.0
 
-- UI design based on [shadcn/ui](https://ui.shadcn.com).
+- UI design from [@oguzyagizkara](https://twitter.com/oguzyagizkara).
+- GPUI component UI design based on [shadcn/ui](https://ui.shadcn.com).
 - Icons from [Lucide](https://lucide.dev).
