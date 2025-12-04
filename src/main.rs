@@ -128,6 +128,7 @@ impl Render for HelloWorld {
             .child(
                 Button::new("send")
                     .rounded_full()
+                    .bg(cx.theme().accent)
                     .icon(Icon::empty().path("icons/move-up.svg")),
             );
 
@@ -139,7 +140,7 @@ impl Render for HelloWorld {
             .border_1()
             .border_color(cx.theme().border.opacity(0.8))
             .bg(cx.theme().popover)
-            .min_h(px(180.))
+            .min_h(px(160.))
             .shadow_lg()
             .w_full()
             .child(
