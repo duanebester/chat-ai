@@ -6,7 +6,7 @@ Written in [gpui](https://gpui.rs) and [gpui-component](https://longbridge.githu
 
 > Requires `ANTHROPIC_API_KEY` to be set.
 
-<img src="https://github.com/duanebester/chat-ai/blob/main/assets/screenshots/chatai.png" height="400px" />
+<img src="https://github.com/duanebester/chat-ai/blob/main/assets/screenshots/chatai-dark.png" height="400px" /> <img src="https://github.com/duanebester/chat-ai/blob/main/assets/screenshots/chatai-light.png" height="400px" />
 
 ## Credits
 
