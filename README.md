@@ -6,8 +6,6 @@ Written in [gpui](https://gpui.rs) and [gpui-component](https://longbridge.githu
 
 <img src="https://github.com/duanebester/chat-ai/blob/main/assets/screenshots/chatai.png" height="400px" />
 
-![screenshot](./assets/screenshots/chatai.png)
-
 ## Credits
 
 - UI design was originally based on work from [@oguzyagizkara](https://twitter.com/oguzyagizkara).
