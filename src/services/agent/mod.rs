@@ -6,12 +6,17 @@
 //! - `types` - Core types like Tool, Message, ContentBlock
 
 mod client;
+mod files;
 mod messages;
 mod types;
 
 // Re-export main client types
 #[allow(unused_imports)]
 pub use client::{Agent, AgentBuilder};
+
+// Re-export files API
+#[allow(unused_imports)]
+pub use files::upload_file;
 
 // Re-export message types
 #[allow(unused_imports)]
@@ -22,4 +27,4 @@ pub use messages::{
 
 // Re-export core types
 #[allow(unused_imports)]
-pub use types::{ContentBlock, Message, Tool, ToolDefinition};
+pub use types::{ContentBlock, FileSource, Message, Tool, ToolDefinition};

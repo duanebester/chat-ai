@@ -3,7 +3,9 @@ use gpui::{AppContext, AsyncApp, WeakEntity};
 
 use crate::{
     ChatAI,
-    services::agent::{Agent, AgentRequest, AgentResponse, ContentBlock, UiMessage},
+    services::agent::{
+        Agent, AgentRequest, AgentResponse, ContentBlock, FileSource, UiMessage, upload_file,
+    },
 };
 
 pub async fn handle_outgoing(
@@ -19,11 +21,38 @@ pub async fn handle_outgoing(
         .build(vec![])
         .ok()
     {
+        // Get API key for file uploads
+        let api_key = std::env::var("ANTHROPIC_API_KEY").unwrap_or_default();
+
         while let Ok(request) = request_rx.recv().await {
             match request {
-                AgentRequest::Chat(content) => {
-                    // Start a new user message
-                    let user_content = vec![ContentBlock::Text { text: content }];
+                AgentRequest::Chat { content, files } => {
+                    // Build user content with text and any uploaded files
+                    let mut user_content = vec![ContentBlock::Text { text: content }];
+
+                    // Upload files and add to content
+                    for path in files {
+                        match smol::unblock({
+                            let api_key = api_key.clone();
+                            let path = path.clone();
+                            move || upload_file(&api_key, &path)
+                        })
+                        .await
+                        {
+                            Ok(file_id) => {
+                                user_content.push(ContentBlock::Document {
+                                    source: FileSource::File { file_id },
+                                });
+                            }
+                            Err(e) => {
+                                tracing::error!("Failed to upload file: {}", e);
+                                let _ = response_tx.try_send(AgentResponse::Error(format!(
+                                    "Failed to upload file: {}",
+                                    e
+                                )));
+                            }
+                        }
+                    }
 
                     match agent.chat_step(user_content).await {
                         Ok(response) => {

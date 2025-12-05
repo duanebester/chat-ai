@@ -11,8 +11,11 @@ use serde_json::Value;
 /// Messages sent from UI to Agent
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AgentRequest {
-    /// Start a new chat with a user message
-    Chat(String),
+    /// Start a new chat with a user message and optional files
+    Chat {
+        content: String,
+        files: Vec<std::path::PathBuf>,
+    },
     /// Provide results for tool calls
     ToolResults(Vec<ToolResultData>),
     /// Clear conversation history
@@ -132,6 +135,7 @@ impl UiMessage {
     }
 
     /// Create a new tool call message
+    #[allow(dead_code)]
     pub fn tool_call(tool_name: String, tool_input: Value) -> Self {
         Self {
             role: MessageRole::ToolCall,

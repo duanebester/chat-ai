@@ -44,9 +44,8 @@ pub fn get_window_options(app: &mut App) -> WindowOptions {
     let bounds = Bounds::centered(display_id_maybe, size(px(400.0), px(600.0)), app);
     WindowOptions {
         display_id: display_id_maybe,
-        focus: true,
         is_movable: true,
-        kind: WindowKind::PopUp,
+        kind: WindowKind::Normal,
         window_bounds: Some(WindowBounds::Windowed(bounds)),
         titlebar: Some(TitleBar::title_bar_options()),
         window_decorations: Some(WindowDecorations::Client),
