@@ -186,7 +186,8 @@ impl ChatAI {
 
         div().p_1().child(elem).into_any_element()
     }
-    fn on_send_message(&mut self, _: &ClickEvent, window: &mut Window, cx: &mut Context<Self>) {
+
+    fn on_submit(&mut self, _: &ClickEvent, window: &mut Window, cx: &mut Context<Self>) {
         let text = self.text_input.read(cx).text().to_string();
         if text.trim().is_empty() {
             return;
@@ -221,6 +222,7 @@ impl ChatAI {
 
         cx.notify();
     }
+
     pub fn change_mode(&mut self, _: &ClickEvent, window: &mut Window, cx: &mut Context<Self>) {
         tracing::debug!("Current mode: {:?}", cx.theme().mode);
         let new_mode = if cx.theme().mode.is_dark() {
@@ -229,6 +231,28 @@ impl ChatAI {
             ThemeMode::Dark
         };
         change_color_mode(new_mode, window, cx);
+    }
+
+    pub fn clear_chat(&mut self, _: &ClickEvent, _window: &mut Window, cx: &mut Context<Self>) {
+        self.set_loading(true, cx);
+        let result = self.request_tx.try_send(AgentRequest::ClearHistory);
+
+        match result {
+            Ok(_) => {
+                tracing::debug!("Chat cleared successfully");
+                cx.update_entity(&self.message_state, |state, cx| {
+                    state.messages.clear();
+                    cx.notify();
+                });
+            }
+            Err(e) => {
+                tracing::error!("Failed to clear chat: {}", e);
+                self.add_message(UiMessage::error(format!("Failed to clear chat: {}", e)), cx);
+            }
+        }
+
+        self.set_loading(false, cx);
+        cx.notify();
     }
 
     fn attachment_label(&mut self) -> String {
@@ -285,6 +309,8 @@ impl ChatAI {
 
 impl Render for ChatAI {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let items_len = self.message_state.read(cx).messages.clone().len();
+
         let theme_toggle = Button::new("theme-mode")
             .map(|this| {
                 if cx.theme().mode.is_dark() {
@@ -294,8 +320,16 @@ impl Render for ChatAI {
                 }
             })
             .small()
+            .tooltip("Change mode")
             .ghost()
             .on_click(cx.listener(Self::change_mode));
+
+        let clear_chat = Button::new("clear-chat")
+            .icon(Icon::empty().path("icons/square-pen.svg"))
+            .tooltip("New chat")
+            .small()
+            .ghost()
+            .on_click(cx.listener(Self::clear_chat));
 
         let header = TitleBar::new().child(
             h_flex()
@@ -304,7 +338,14 @@ impl Render for ChatAI {
                 .pr_1()
                 .justify_between()
                 .child(Label::new("ChatAI"))
-                .child(div().pr(px(5.0)).flex().items_center().child(theme_toggle)),
+                .child(
+                    div()
+                        .pr(px(5.0))
+                        .flex()
+                        .items_center()
+                        .when(items_len > 0, |d| d.child(clear_chat))
+                        .child(theme_toggle),
+                ),
         );
 
         let empty_content = div()
@@ -373,7 +414,7 @@ impl Render for ChatAI {
                     .bg(cx.theme().accent)
                     .loading(self.is_loading.clone())
                     .icon(Icon::empty().path("icons/move-up.svg"))
-                    .on_click(cx.listener(Self::on_send_message)),
+                    .on_click(cx.listener(Self::on_submit)),
             );
 
         let form = div()
@@ -396,7 +437,6 @@ impl Render for ChatAI {
             )
             .child(form_footer);
 
-        let items_len = self.message_state.read(cx).messages.clone().len();
         div().v_flex().size_full().child(header).child(
             div()
                 .p_2()
