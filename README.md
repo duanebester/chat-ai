@@ -4,6 +4,8 @@ Smol AI chat app with anthropic and file upload support.
 
 Written in [gpui](https://gpui.rs) and [gpui-component](https://longbridge.github.io/gpui-component/).
 
+<img src="https://github.com/duanebester/chat-ai/blob/main/assets/screenshots/chatai.png" height="400px" />
+
 ![screenshot](./assets/screenshots/chatai.png)
 
 ## Credits
