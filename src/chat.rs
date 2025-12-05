@@ -11,6 +11,7 @@ use gpui::{
 };
 use gpui_component::{
     ActiveTheme as _, Icon, IndexPath, Sizable as _, StyledExt as _, ThemeMode, TitleBar,
+    alert::Alert,
     button::*,
     divider::Divider,
     h_flex,
@@ -19,7 +20,7 @@ use gpui_component::{
     select::{Select, SelectEvent, SelectState},
     text::TextView,
 };
-use std::path::PathBuf;
+use std::{env, path::PathBuf};
 
 /// Available LLM models
 pub const AVAILABLE_MODELS: &[(&str, &str)] = &[
@@ -39,8 +40,9 @@ pub struct ChatAI {
     list_state: ListState,
     request_tx: Sender<AgentRequest>,
     model_select: Entity<SelectState<Vec<SharedString>>>,
-    is_loading: bool,
     attached_files: Vec<PathBuf>,
+    is_loading: bool,
+    has_api_key: bool,
 }
 
 impl ChatAI {
@@ -48,6 +50,8 @@ impl ChatAI {
         cx.new(|cx| ChatAI::new(window, cx))
     }
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+        let has_api_key = env::var("ANTHROPIC_API_KEY").ok().is_some();
+
         /*
          * Create a channel
          * Spawn on the background and block there, send messages over the channel
@@ -120,6 +124,7 @@ impl ChatAI {
             request_tx,
             model_select,
             is_loading: false,
+            has_api_key,
             attached_files: vec![],
         }
     }
@@ -355,6 +360,9 @@ impl Render for ChatAI {
             .justify_end()
             .gap_4()
             .p_4()
+            .when(!self.has_api_key.clone(), |d| {
+                d.child(Alert::error("no-api-key", "No Anthropic API Key Found"))
+            })
             .child(
                 div()
                     .flex()
@@ -429,11 +437,11 @@ impl Render for ChatAI {
             .shadow_lg()
             .w_full()
             .child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .child(form_header)
-                    .child(Input::new(&self.text_input.clone()).appearance(false)),
+                div().flex().flex_col().child(form_header).child(
+                    Input::new(&self.text_input.clone())
+                        .appearance(false)
+                        .disabled(!self.has_api_key.clone()),
+                ),
             )
             .child(form_footer);
 
