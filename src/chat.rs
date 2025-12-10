@@ -115,7 +115,12 @@ impl ChatAI {
         )
         .detach();
 
-        let text_input = cx.new(|cx| InputState::new(window, cx).placeholder("Ask me anything"));
+        let text_input = cx.new(|cx| {
+            InputState::new(window, cx)
+                .auto_grow(1, 5)
+                .soft_wrap(true)
+                .placeholder("Ask me anything")
+        });
 
         Self {
             text_input,
@@ -433,7 +438,7 @@ impl Render for ChatAI {
             .border_1()
             .border_color(cx.theme().border.opacity(0.8))
             .bg(cx.theme().popover)
-            .min_h(px(160.))
+            .h(px(220.))
             .shadow_lg()
             .w_full()
             .child(
